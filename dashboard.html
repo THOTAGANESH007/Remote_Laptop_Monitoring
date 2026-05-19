@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Projects</title>
+    <style>
+        :root { --bg: #0f172a; --card: #1e293b; --accent: #3b82f6; --text: #f8fafc; }
+        body { font-family: sans-serif; background: var(--bg); color: var(--text); padding: 20px; margin: 0; }
+        .container { max-width: 600px; margin: auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .card { background: var(--card); padding: 15px; border-radius: 12px; border: 1px solid #334155; cursor: pointer; }
+        .file-item { display: flex; justify-content: space-between; padding: 15px; border-bottom: 1px solid #334155; text-decoration: none; color: white; align-items: center; }
+        .btn { background: var(--accent); color: white; text-decoration: none; padding: 10px 18px; border-radius: 10px; font-weight: bold; border: none; cursor: pointer; }
+        #view-files { background: var(--card); border-radius: 16px; border: 1px solid #334155; display: none; overflow: hidden; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="list-view">
+            <div class="header"><h2>My Projects</h2> <a href="index.html" class="btn">+ New</a><button onclick="loadProjects()" class="btn" style="background: #10b981">Refresh</button></div>
+            <div id="project-grid" class="grid"></div>
+        </div>
+        <div id="view-files">
+            <div class="header" style="padding: 15px; border-bottom: 1px solid #334155; margin: 0;">
+                <button onclick="showList()" class="btn" style="background: #475569">← Back</button>
+                <h3 id="current-name" style="margin: 0;"></h3>
+            </div>
+            <div id="files-list"></div>
+        </div>
+    </div>
+    <script>
+        const host = window.location.hostname;
+        const key = localStorage.getItem('agent_key');
+        async function load() {
+            if (!key) { const k = prompt("Access Key:"); localStorage.setItem('agent_key', k); location.reload(); }
+            const res = await fetch(`http://${host}:8000/list-projects`, { headers: {'x-api-key': key} });
+            const data = await res.json();
+            document.getElementById('project-grid').innerHTML = data.map(p => `<div class="card" onclick="view('${p.name}')"><h3>📁 ${p.name}</h3></div>`).join('');
+        }
+        async function view(name) {
+            document.getElementById('list-view').style.display = 'none';
+            document.getElementById('view-files').style.display = 'block';
+            document.getElementById('current-name').innerText = name;
+            const res = await fetch(`http://${host}:8000/list-project-files/${encodeURIComponent(name)}`, { headers: {'x-api-key': key} });
+            const files = await res.json();
+            document.getElementById('files-list').innerHTML = files.map(f => `
+                <a class="file-item" href="/${encodeURIComponent(name)}/${encodeURIComponent(f.name)}" target="_blank">
+                    <span>${f.is_dir ? '📁' : '📄'} ${f.name}</span>
+                    <span style="color: #94a3b8; font-size: 11px;">${f.size}</span>
+                </a>`).join('');
+        }
+        function showList() { document.getElementById('list-view').style.display = 'block'; document.getElementById('view-files').style.display = 'none'; }
+        load();
+    </script>
+</body>
+</html>
