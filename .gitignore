@@ -1,6 +1,6 @@
 __pycache__/
 *.py[cod]
 *.log
-build_log.txt
+build.log
 .DS_Store
 .env
