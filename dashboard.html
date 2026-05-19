@@ -31,28 +31,64 @@
         </div>
     </div>
     <script>
-        const host = window.location.hostname;
-        const key = localStorage.getItem('agent_key');
-        async function load() {
-            if (!key) { const k = prompt("Access Key:"); localStorage.setItem('agent_key', k); location.reload(); }
-            const res = await fetch(`http://${host}:8000/list-projects`, { headers: {'x-api-key': key} });
-            const data = await res.json();
-            document.getElementById('project-grid').innerHTML = data.map(p => `<div class="card" onclick="view('${p.name}')"><h3>📁 ${p.name}</h3></div>`).join('');
+    const host = window.location.hostname;
+    const apiBase = `http://${host}:8000`; 
+    const key = localStorage.getItem('agent_key');
+
+    async function load() {
+        if (!key) { 
+            const k = prompt("Access Key:"); 
+            if(k) { localStorage.setItem('agent_key', k); location.reload(); }
+            return; 
         }
-        async function view(name) {
-            document.getElementById('list-view').style.display = 'none';
-            document.getElementById('view-files').style.display = 'block';
-            document.getElementById('current-name').innerText = name;
-            const res = await fetch(`http://${host}:8000/list-project-files/${encodeURIComponent(name)}`, { headers: {'x-api-key': key} });
+        
+        try {
+            const res = await fetch(`${apiBase}/list-projects`, { 
+                headers: {'x-api-key': key} 
+            });
+            
+            if (res.status === 403) {
+                alert("Invalid Access Key");
+                return;
+            }
+
+            const data = await res.json();
+            document.getElementById('project-grid').innerHTML = data.map(p => `
+                <div class="card" onclick="view('${p.name}')"><h3>📁 ${p.name}</h3></div>
+            `).join('');
+        } catch (err) {
+            console.error("API Error:", err);
+            alert("Could not connect to API on port 8000");
+        }
+    }
+
+    async function view(name) {
+        document.getElementById('list-view').style.display = 'none';
+        document.getElementById('view-files').style.display = 'block';
+        document.getElementById('current-name').innerText = name;
+        
+        try {
+            const res = await fetch(`${apiBase}/list-project-files/${encodeURIComponent(name)}`, { 
+                headers: {'x-api-key': key} 
+            });
             const files = await res.json();
+            
             document.getElementById('files-list').innerHTML = files.map(f => `
-                <a class="file-item" href="/${encodeURIComponent(name)}/${encodeURIComponent(f.name)}" target="_blank">
+                <a class="file-item" href="/projects/${encodeURIComponent(name)}/${encodeURIComponent(f.name)}" target="_blank">
                     <span>${f.is_dir ? '📁' : '📄'} ${f.name}</span>
                     <span style="color: #94a3b8; font-size: 11px;">${f.size}</span>
                 </a>`).join('');
+        } catch (err) {
+            alert("Error loading files");
         }
-        function showList() { document.getElementById('list-view').style.display = 'block'; document.getElementById('view-files').style.display = 'none'; }
-        load();
-    </script>
+    }
+
+    function showList() { 
+        document.getElementById('list-view').style.display = 'block'; 
+        document.getElementById('view-files').style.display = 'none'; 
+    }
+    
+    load();
+</script>
 </body>
 </html>
