@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Builder</title>
+    <style>
+        body { font-family: sans-serif; background: #0f172a; color: white; padding: 20px; }
+        .card { background: #1e293b; padding: 20px; border-radius: 16px; max-width: 500px; margin: auto; }
+        input, textarea { width: 100%; box-sizing: border-box; margin-top: 10px; background: #0f172a; border: 1px solid #334155; color: white; padding: 12px; border-radius: 8px; }
+        button { width: 100%; margin-top: 20px; padding: 15px; background: #3b82f6; border: none; color: white; border-radius: 10px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div style="display: flex; justify-content: space-between;"><h2>New Project</h2> <a href="dashboard.html" style="color: #3b82f6;">Dashboard</a></div>
+        <input type="text" id="n" placeholder="Folder Name">
+        <input type="password" id="k" placeholder="Access Key">
+        <textarea id="i" rows="5" placeholder="Project Idea..."></textarea>
+        <button onclick="b()">Launch Build</button>
+    </div>
+    <script>
+        document.getElementById('k').value = localStorage.getItem('agent_key');
+        async function b() {
+            const idea = document.getElementById('i').value;
+            const name = document.getElementById('n').value;
+            const key = document.getElementById('k').value;
+            localStorage.setItem('agent_key', key);
+            const res = await fetch(`http://${window.location.hostname}:8000/build`, {
+                method: 'POST', headers: {'Content-Type': 'application/json', 'x-api-key': key},
+                body: JSON.stringify({idea, name})
+            });
+            const d = await res.json(); alert(d.message);
+        }
+    </script>
+</body>
+</html>
