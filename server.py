@@ -61,15 +61,15 @@ def run_aider(idea, folder_name):
     with open(f"{full_path}/build.log", "w") as log:
         subprocess.run(cmd, cwd=full_path, stdout=log, stderr=log)
 
-    # AUTO-PUSH TO GITHUB
+    # AUTO PUSH TO GITHUB
     try:
         # Add all new files in the projects folder
-        subprocess.run(["git", "add", "."], cwd=projects_root)
+        subprocess.run(["git", "add", "."], cwd=base_path)
         # Commit with a timestamp and the idea
         commit_msg = f"Auto-build: {folder_name} - {idea[:20]}..."
-        subprocess.run(["git", "commit", "-m", commit_msg], cwd=projects_root)
+        subprocess.run(["git", "commit", "-m", commit_msg], cwd=base_path)
         # Push to GitHub
-        subprocess.run(["git", "push", "origin", "main"], cwd=projects_root)
+        subprocess.run(["git", "push", "origin", "main"], cwd=base_path)
         print(f"Successfully pushed {folder_name} to GitHub.")
     except Exception as e:
         print(f"Git Push failed: {e}")
