@@ -31,8 +31,6 @@
         </div>
     </div>
     <script>
-    const host = window.location.hostname;
-    const apiBase = `http://${host}:8000`; 
     const key = localStorage.getItem('agent_key');
 
     async function load() {
@@ -43,7 +41,9 @@
         }
         
         try {
-            const res = await fetch(`${apiBase}/list-projects`, { 
+            // RELATIVE PATH: No http, No IP, No Port 8000. 
+            // The browser will automatically use https://thotaganesh.me/list-projects
+            const res = await fetch('/list-projects', { 
                 headers: {'x-api-key': key} 
             });
             
@@ -57,8 +57,8 @@
                 <div class="card" onclick="view('${p.name}')"><h3>📁 ${p.name}</h3></div>
             `).join('');
         } catch (err) {
-            console.error("API Error:", err);
-            alert("Could not connect to API on port 8000");
+            console.error(err);
+            alert("Connection Error: Check Nginx and API Status.");
         }
     }
 
@@ -68,7 +68,8 @@
         document.getElementById('current-name').innerText = name;
         
         try {
-            const res = await fetch(`${apiBase}/list-project-files/${encodeURIComponent(name)}`, { 
+            // RELATIVE PATH
+            const res = await fetch(`/list-project-files/${encodeURIComponent(name)}`, { 
                 headers: {'x-api-key': key} 
             });
             const files = await res.json();
@@ -79,7 +80,7 @@
                     <span style="color: #94a3b8; font-size: 11px;">${f.size}</span>
                 </a>`).join('');
         } catch (err) {
-            alert("Error loading files");
+            alert("Error loading files.");
         }
     }
 
@@ -89,6 +90,6 @@
     }
     
     load();
-</script>
+</script>      
 </body>
 </html>

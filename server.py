@@ -64,13 +64,23 @@ async def list_project_files(project_name: str, x_api_key: str = Header(None)):
     return sorted(files, key=lambda x: (not x['is_dir'], x['name']))
 
 def run_aider(idea, folder_name):
-    os.environ["OLLAMA_API_BASE"] = "http://localhost:11434"
+    os.environ["OLLAMA_API_BASE"] = "http://host.docker.internal:11434"
     os.environ["OPENAI_API_KEY"] = "none"
     
     full_path = os.path.join(PROJECTS_DIR, folder_name)
     os.makedirs(full_path, exist_ok=True)
     
-    cmd = ["aider", "--model", MODEL_NAME, "--no-check-update", "--no-git", "--yes", "--message", idea]
+    cmd = [
+        "docker", "run", "--rm",
+        "-v", f"{full_path}:/app",
+        "--add-host=host.docker.internal:host-gateway",
+        "-e", "OLLAMA_API_BASE=http://host.docker.internal:11434",
+        "paulgauthier/aider", # Official Aider Image
+        "--model", MODEL_NAME,
+        "--no-check-update",
+        "--yes",
+        "--message", idea
+    ]
     
     with open(f"{full_path}/build.log", "w") as log:
         subprocess.run(cmd, cwd=full_path, stdout=log, stderr=log)

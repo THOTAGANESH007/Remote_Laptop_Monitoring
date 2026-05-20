@@ -25,10 +25,14 @@
             const name = document.getElementById('n').value;
             const key = document.getElementById('k').value;
             localStorage.setItem('agent_key', key);
-            const res = await fetch(`http://${window.location.hostname}:8000/build`, {
-                method: 'POST', headers: {'Content-Type': 'application/json', 'x-api-key': key},
-                body: JSON.stringify({idea, name})
-            });
+	    const res = await fetch('/build', {
+    	    method: 'POST',
+    	    headers: {
+            	'Content-Type': 'application/json',
+        	'x-api-key': key
+    	    },
+   	    body: JSON.stringify({idea, name})
+	    });
             const d = await res.json(); alert(d.message);
         }
     </script>
