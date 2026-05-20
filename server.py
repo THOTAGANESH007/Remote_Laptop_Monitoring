@@ -69,14 +69,21 @@ def run_aider(idea, folder_name):
     
     full_path = os.path.join(PROJECTS_DIR, folder_name)
     os.makedirs(full_path, exist_ok=True)
-    
+
+    uid = os.getuid()
+    gid = os.getgid()    
+
     cmd = [
         "docker", "run", "--rm",
-        "-v", f"{full_path}:/app",
+        "--user", f"{uid}:{gid}",
+        "-v", f"{full_path}:/app:z",
+        "-w", "/app",
+        "-e", "HOME=/app",
         "--add-host=host.docker.internal:host-gateway",
         "-e", "OLLAMA_API_BASE=http://host.docker.internal:11434",
-        "paulgauthier/aider", # Official Aider Image
-        "--model", MODEL_NAME,
+        "paulgauthier/aider", 
+        "--model", "ollama/qwen2.5-coder:3b",
+        "--edit-format", "whole",     # Forces small models to actually write
         "--no-check-update",
         "--yes",
         "--message", idea
