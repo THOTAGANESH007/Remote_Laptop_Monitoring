@@ -19,30 +19,34 @@
 <body>
     <div class="container">
         <div id="list-view">
-            <div class="header"><h2>My Projects</h2> <a href="index.html" class="btn">+ New</a><button onclick="loadProjects()" class="btn" style="background: #10b981">Refresh</button></div>
-            <div id="project-grid" class="grid"></div>
+            <div class="header"><h2>My Projects</h2>
+		 <a href="index.html" class="btn">+ New</a>
+		 <button onclick="load()" class="btn" style="background: #10b981">Refresh</button>
+	    </div>
+        <div id="project-grid" class="grid"></div>
+    </div>
+    <div id="view-files">
+        <div class="header" style="padding: 15px; border-bottom: 1px solid #334155; margin: 0;">
+          <button onclick="showList()" class="btn" style="background: #475569">← Back</button>
+          <h3 id="current-name" style="margin: 0;"></h3>
         </div>
-        <div id="view-files">
-            <div class="header" style="padding: 15px; border-bottom: 1px solid #334155; margin: 0;">
-                <button onclick="showList()" class="btn" style="background: #475569">← Back</button>
-                <h3 id="current-name" style="margin: 0;"></h3>
-            </div>
-            <div id="files-list"></div>
-        </div>
+    <div id="files-list"></div>
+    </div>
     </div>
     <script>
+    const host = window.location.hostname;
     const key = localStorage.getItem('agent_key');
 
     async function load() {
         if (!key) { 
             const k = prompt("Access Key:"); 
-            if(k) { localStorage.setItem('agent_key', k); location.reload(); }
+            if(k) { localStorage.setItem('agent_key', k);
+		    location.reload();
+		   }
             return; 
         }
         
         try {
-            // RELATIVE PATH: No http, No IP, No Port 8000. 
-            // The browser will automatically use https://thotaganesh.me/list-projects
             const res = await fetch('/list-projects', { 
                 headers: {'x-api-key': key} 
             });
@@ -68,7 +72,6 @@
         document.getElementById('current-name').innerText = name;
         
         try {
-            // RELATIVE PATH
             const res = await fetch(`/list-project-files/${encodeURIComponent(name)}`, { 
                 headers: {'x-api-key': key} 
             });

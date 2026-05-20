@@ -9,7 +9,7 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], all
 
 # --- CONFIGURATION ---
 ACCESS_TOKEN = os.environ.get("AGENT_ACCESS_TOKEN") 
-MODEL_NAME = os.environ.get("AGENT_MODEL", "ollama/qwen2.5-coder:3b")
+MODEL_NAME = os.environ.get("AGENT_MODEL", "ollama/qwen2.5-coder:7b")
 NTFY_TOPIC = os.environ.get("AGENT_NTFY_TOPIC")
 
 # Define Paths
@@ -82,9 +82,10 @@ def run_aider(idea, folder_name):
         "--add-host=host.docker.internal:host-gateway",
         "-e", "OLLAMA_API_BASE=http://host.docker.internal:11434",
         "paulgauthier/aider", 
-        "--model", "ollama/qwen2.5-coder:3b",
-        "--edit-format", "whole",     # Forces small models to actually write
+        "--model", MODEL_NAME,
+        "--architect",
         "--no-check-update",
+        "--no-git",
         "--yes",
         "--message", idea
     ]
